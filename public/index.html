@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIM Outreach — Control Panel</title>
+<meta name="description" content="Control panel for the AIM cold-outreach pipeline. Runs on GitHub Actions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { color-scheme: dark; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Inter, system-ui, sans-serif;
+    background: #0b0e14;
+    color: #e6e9ef;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    width: 100%;
+    max-width: 640px;
+    background: #12161f;
+    border: 1px solid #232a37;
+    border-radius: 16px;
+    padding: 40px;
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 600; letter-spacing: .04em;
+    color: #7ee2a8; background: rgba(52,199,89,.08);
+    border: 1px solid rgba(52,199,89,.25);
+    padding: 6px 12px; border-radius: 999px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #34c759; }
+  h1 { font-size: 26px; font-weight: 700; margin: 20px 0 8px; }
+  p.sub { color: #97a1b3; font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  a.tile {
+    display: block; text-decoration: none;
+    background: #181e2a; border: 1px solid #232a37;
+    border-radius: 12px; padding: 16px 18px;
+    transition: border-color .15s, transform .15s;
+  }
+  a.tile:hover { border-color: #3d4859; transform: translateY(-1px); }
+  a.tile b { display: block; color: #e6e9ef; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  a.tile span { color: #97a1b3; font-size: 12.5px; line-height: 1.45; display: block; }
+  .wide { grid-column: 1 / -1; }
+  footer { margin-top: 28px; padding-top: 20px; border-top: 1px solid #1c2230;
+    color: #6b7486; font-size: 12px; line-height: 1.6; }
+  footer b { color: #97a1b3; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .card { padding: 28px; } }
+</style>
+</head>
+<body>
+  <main class="card">
+    <span class="badge"><span class="dot"></span>PIPELINE LIVE — RUNS ON GITHUB ACTIONS</span>
+    <h1>AIM Outreach</h1>
+    <p class="sub">Cold outreach for AIM — custom e-commerce builds with WhatsApp automation,
+    AI cart recovery and CAD analytics, aimed at store owners in the US, UK, Canada and Australia.
+    Everything below opens on GitHub, where the pipeline actually runs.</p>
+
+    <div class="grid">
+      <a class="tile" href="https://github.com/organizesathish35-design/openoutreach/edit/main/product.md">
+        <b>Edit product.md</b><span>What AIM is and how it is priced — used to write every email.</span>
+      </a>
+      <a class="tile" href="https://github.com/organizesathish35-design/openoutreach/edit/main/target.md">
+        <b>Edit target.md</b><span>Who counts as a good lead — US / UK / CA / AU store owners.</span>
+      </a>
+      <a class="tile" href="https://github.com/organizesathish35-design/openoutreach/actions/workflows/run.yml">
+        <b>Run now</b><span>Run workflow &gt; pick a goal &gt; finds and emails leads. Watch the log live.</span>
+      </a>
+      <a class="tile" href="https://github.com/organizesathish35-design/openoutreach/actions">
+        <b>Recent runs</b><span>History and logs of every past outreach run.</span>
+      </a>
+      <a class="tile wide" href="https://github.com/organizesathish35-design/openoutreach">
+        <b>Repository</b><span>Campaign docs, workflow files and setup notes (SETUP-STATUS.md is local).</span>
+      </a>
+    </div>
+
+    <footer>
+      <b>Schedule:</b> every Monday 04:00 UTC (09:30 IST), plus on-demand runs above.
+      <b>Credits:</b> each emailed lead costs 1 BetterContact credit — finding without addresses is free.
+      This site is a static control panel only; no pipeline state is hosted here.
+    </footer>
+  </main>
+</body>
+</html>
