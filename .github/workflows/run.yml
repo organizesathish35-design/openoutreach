@@ -2,7 +2,7 @@ name: Outreach run
 
 on:
   schedule:
-    - cron: "0 4 * * 1" # Mondays 04:30 UTC (09:30 IST). Add more cron lines to run more often.
+    - cron: "0 4 * * 1" # Mondays 04:00 UTC (09:30 IST). Add more cron lines to run more often.
   workflow_dispatch:
     inputs:
       goal:
@@ -75,6 +75,23 @@ jobs:
 
           for key, value in env.items():
               os.environ[key] = value
+
+          # Campaign text always comes from the committed product.md / target.md, so
+          # edits made on github.com take effect on the next run without touching the
+          # secret. A file still holding its TODO template is skipped: an empty env var
+          # means "use default / report missing", while TODO text would be judged as a
+          # real campaign.
+          from pathlib import Path
+
+          def override(var, filename):
+              text = Path(filename).read_text(encoding="utf-8")
+              if "TODO" not in text:
+                  os.environ[var] = text
+
+          override("OPENOUTFIND_PRODUCT_DOCS", "product.md")
+          override("OUTSEND_PRODUCT_DOCS", "product.md")
+          override("OPENOUTFIND_CAMPAIGN_TARGET", "target.md")
+          override("OUTSEND_CAMPAIGN_TARGET", "target.md")
 
           result = subprocess.run([sys.executable, "-m", "openoutreach", "run", os.environ.get("RUN_GOAL", "5")])
           sys.exit(result.returncode)
