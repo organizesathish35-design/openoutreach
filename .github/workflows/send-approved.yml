@@ -1,0 +1,44 @@
+name: Send approved
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max emails this run"
+        default: "10"
+
+concurrency:
+  group: sheetflow
+  cancel-in-progress: false
+
+jobs:
+  send-approved:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install
+        run: |
+          uv pip install --system -e .
+          uv pip install --system gspread google-auth
+
+      - name: Restore pipeline state
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: outreach-data-${{ github.run_id }}
+          restore-keys: outreach-data-
+
+      - name: Send every row marked Approved = YES
+        env:
+          OPENOUTREACH_ENV: ${{ secrets.OPENOUTREACH_ENV }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: python -m sheetflow send --limit "${{ github.event.inputs.limit || '10' }}"

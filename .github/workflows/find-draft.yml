@@ -1,0 +1,46 @@
+name: Find + draft to Sheet
+
+on:
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: "How many leads to find (1 credit each for the address)"
+        default: "5"
+
+concurrency:
+  group: sheetflow
+  cancel-in-progress: false
+
+jobs:
+  find-and-draft:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install
+        run: |
+          uv pip install --system -e .
+          uv pip install --system gspread google-auth
+
+      - name: Restore pipeline state
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: outreach-data-${{ github.run_id }}
+          restore-keys: outreach-data-
+
+      - name: Find leads, buy addresses, write drafts into the Google Sheet
+        env:
+          OPENOUTREACH_ENV: ${{ secrets.OPENOUTREACH_ENV }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: |
+          python -m sheetflow find "${{ github.event.inputs.goal || '5' }}"
+          python -m sheetflow draft

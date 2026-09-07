@@ -1,8 +1,9 @@
-name: Outreach run
+name: Outreach run (full auto)
 
 on:
-  schedule:
-    - cron: "0 4 * * 1" # Mondays 04:00 UTC (09:30 IST). Add more cron lines to run more often.
+  # No schedule any more: sending is approval-gated through the Google Sheet
+  # (find-draft.yml + send-approved.yml). This verb remains for a deliberate
+  # hands-off run.
   workflow_dispatch:
     inputs:
       goal:
