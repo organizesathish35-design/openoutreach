@@ -27,11 +27,19 @@ from .support import (
 # ── Step 1: find ───────────────────────────────────────────────────
 
 
+def _company_key(company: str) -> str:
+    """A loose key for 'one person per company': letters and digits only, casefolded."""
+    return "".join(ch for ch in company.strip().casefold() if ch.isalnum())
+
+
 def cmd_find(goal: int, free: bool = False) -> int:
     """Find leads through the finder's own CLI and put them in the sheet.
 
     Without `--free` the goal is in the `emails` unit: the finder buys one verified
     address per lead (1 BetterContact credit each) before the row reaches the sheet.
+    One person per company: a candidate whose company is already in the sheet (or
+    already seen in this batch) is dropped, since the whole point of the sheet is a
+    company-first call list.
     """
     with Bootstrap():
         args = [sys.executable, "-m", "openoutreach", "find", str(goal)]
@@ -57,17 +65,22 @@ def cmd_find(goal: int, free: bool = False) -> int:
     if not records and proc.returncode != 0:
         sys.exit(f"[sheetflow] the finder failed and returned nothing:\n{proc.stderr[-1500:]}")
     if proc.returncode != 0:
-        print(f"[sheetflow] note: the finder stopped short; keeping what arrived.",
+        print("[sheetflow] note: the finder stopped short; keeping what arrived.",
               file=sys.stderr)
 
     ws, index = open_sheet()
-    known = {}
+    known_lead_ids = {}
+    seen_companies = set()
     for number, values in sheet_rows(ws, index):
         lead_id = values["Lead ID"].strip()
         if lead_id:
-            known[lead_id] = number
+            known_lead_ids[lead_id] = number
+        company = _company_key(values["Company"])
+        if company:
+            seen_companies.add(company)
 
-    appended, updated = 0, 0
+    appended, updated, skipped_same_company = 0, 0, 0
+    batch = []
     for record in records:
         lead_id = str(record.get("lead_id") or "").strip()
         if not lead_id:
@@ -75,9 +88,13 @@ def cmd_find(goal: int, free: bool = False) -> int:
         email = (record.get("email") or "").strip()
         profile = (record.get("profile_text") or "").strip()
         reason = (record.get("reason") or "").strip()
-        if lead_id in known:
+        company_key = _company_key(record.get("company") or "")
+        if company_key and company_key in seen_companies:
+            skipped_same_company += 1
+            continue
+        if lead_id in known_lead_ids:
             # A re-find: fill the address in on the row that already exists.
-            number = known[lead_id]
+            number = known_lead_ids[lead_id]
             existing = ws.row_values(number)
             current_email = existing[index["Email"]] if index["Email"] < len(existing) else ""
             if email and not current_email.strip():
@@ -87,8 +104,8 @@ def cmd_find(goal: int, free: bool = False) -> int:
                 write_row(ws, number, updates, index)
                 updated += 1
             continue
-        status = "Found" if email else ("Found - no email" if free else "Found - no email")
-        row = [
+        status = "Found" if email else "Found - no email"
+        batch.append([
             lead_id,
             (record.get("first_name") or "").strip(),
             (record.get("last_name") or "").strip(),
@@ -101,12 +118,15 @@ def cmd_find(goal: int, free: bool = False) -> int:
             profile[:PROFILE_CELL_LIMIT],
             status,
             "", "", "", "", "",
-        ]
-        ws.append_row(row, value_input_option="RAW")
-        appended += 1
-        known[lead_id] = None
+        ])
+        seen_companies.add(company_key)
 
-    print(f"[sheetflow] sheet updated: {appended} new row(s), {updated} filled with an address")
+    for start in range(0, len(batch), 100):
+        ws.append_rows(batch[start:start + 100], value_input_option="RAW")
+        appended += len(batch[start:start + 100])
+
+    print(f"[sheetflow] sheet updated: {appended} new row(s), {updated} filled with an address, "
+          f"{skipped_same_company} dropped (company already in the sheet)")
     return 0
 
 

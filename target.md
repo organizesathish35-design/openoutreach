@@ -7,21 +7,21 @@
 
 Who I am going after:
 
-People selling — or about to sell — online in English-speaking tier-one markets:
-US, UK, Canada, Australia. Mostly owners of existing Shopify / WooCommerce / custom
-stores that already get traffic and sales but leak revenue; also sellers a few weeks
-from launching who want the system in from day one.
+Owners and founders of small and growing D2C / e-commerce brands in India, selling on
+Shopify, WooCommerce or their own custom store. One person per company. They are at a
+stage where they would happily work with an upcoming company like AIM — no in-house
+tech or CRO team, and they want hands-on help, not another dashboard.
 
 What outcome they want / what pain they feel:
 
-They pay for traffic, carts fill up, then die — and nothing tells them why. They
-know abandoned carts mean money left on the table and have seen WhatsApp recovery
-work for other stores, but don't know how to set it up properly (verified business,
-compliant opt-in). They want their store to actively recover sales, not just display
-products — and one dashboard instead of five tools.
+They spend on Meta or Google ads every month, carts fill up and then die, and they
+can't say exactly why. They have seen WhatsApp cart recovery work for other stores and
+want it set up properly (verified business, compliant opt-in). They want their store
+to actively recover lost sales, with website, payments, shipping and WhatsApp wired
+into one system — not five disconnected tools.
 
 Company size / roles / geography:
 
-Founder/owner, e-commerce or marketing manager; solo operators up to ~50 employees;
-any product niche. US, UK, Canada, Australia first. Not enterprises with in-house
-dev teams, not idea-stage with no store or budget.
+Founder, owner, or the person running marketing / e-commerce. Roughly ₹5 lakh to ₹2
+crore yearly revenue, 1–3 years old, India-first. Not enterprise brands with in-house
+teams, not hobby stores with no budget, not dropshippers testing dozens of products.
