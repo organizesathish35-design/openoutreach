@@ -1,0 +1,81 @@
+name: Outreach run
+
+on:
+  schedule:
+    - cron: "0 4 * * 1" # Mondays 04:30 UTC (09:30 IST). Add more cron lines to run more often.
+  workflow_dispatch:
+    inputs:
+      goal:
+        description: "How many leads to find and email this run"
+        default: "5"
+
+concurrency:
+  group: outreach-run
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install
+        run: uv pip install --system -e .
+
+      # The SQLite file carries the leads, CRM state and the mailbox's learned
+      # sending capacity. It is gitignored, so it travels between runs as a
+      # cache entry instead. Keys rotate to force a re-save; restore-keys keeps
+      # the newest previous state.
+      - name: Restore pipeline state
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: outreach-data-${{ github.run_id }}
+          restore-keys: outreach-data-
+
+      - name: Apply configuration and run
+        env:
+          OPENOUTREACH_ENV: ${{ secrets.OPENOUTREACH_ENV }}
+          RUN_GOAL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.goal || '5' }}
+        run: |
+          python - <<'PY'
+          import os, re, subprocess, sys
+
+          text = os.environ.get("OPENOUTREACH_ENV", "")
+          if not text.strip():
+              sys.exit("Secret OPENOUTREACH_ENV is not set. See SETUP-STATUS.md for what to paste.")
+
+          env, lines, i = {}, text.splitlines(), 0
+          while i < len(lines):
+              line = lines[i].strip(); i += 1
+              if not line or line.startswith("#") or "=" not in line:
+                  continue
+              key, _, val = line.partition("=")
+              key = re.sub(r"^export\s+", "", key.strip())
+              val = val.strip()
+              if val.startswith('"'):
+                  closed = val.endswith('"') and not val.endswith('\\"') and len(val) > 1
+                  while not closed and i < len(lines):
+                      nxt = lines[i]; i += 1
+                      val += "\n" + nxt
+                      closed = nxt.rstrip().endswith('"') and not nxt.rstrip().endswith('\\"')
+                  inner = val[1:]
+                  end = inner.rfind('"')
+                  if end != -1:
+                      inner = inner[:end]
+                  val = inner.replace('\\"', '"').replace("\\n", "\n").replace("\\\\", "\\")
+              env[key] = val
+
+          for key, value in env.items():
+              os.environ[key] = value
+
+          result = subprocess.run([sys.executable, "-m", "openoutreach", "run", os.environ.get("RUN_GOAL", "5")])
+          sys.exit(result.returncode)
+          PY
